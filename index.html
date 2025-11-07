@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>គ្រប់គ្រងសុខភាពរបស់យើង</title>
+    <link rel="stylesheet" href="src/style.css">
+    <link rel="icon" href="src/icon.jpg">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Khmer OS Battambang', Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #3498db; /* ខៀវស្រស់ */
+            color: white;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background-color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Tabs Styling */
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #ecf0f1;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 6px 6px 0 0;
+            transition: background-color 0.3s;
+        }
+
+        .tab-button.active {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            padding-top: 10px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Form and Input Styles */
+        input[type="date"], input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button[type="submit"] {
+            background-color: #2ecc71; /* បៃតង */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        /* Summary Boxes (KPIs) */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .summary-box {
+            background-color: #eaf2f8;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .kpi-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #3498db;
+            margin: 5px 0;
+        }
+
+        /* Chart Area */
+        .chart-area {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 20px;
+        }
+
+        .chart-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            /* កំណត់កម្ពស់សម្រាប់ក្រាហ្វិក */
+            height: 400px; 
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .chart-area {
+                grid-template-columns: 1fr;
+            }
+            .chart-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>📈 Health & Wellness </h1>
+    </header>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab-button active" data-tab="data-entry">បញ្ចូលទិន្នន័យ</button>
+            <button class="tab-button" data-tab="dashboard-view">ផ្ទាំងក្រាហ្វិក</button>
+        </div>
+
+        <div id="data-entry" class="tab-content active">
+            <div class="card form-card">
+                <h2>បញ្ចូលកំណត់ត្រាប្រចាំថ្ងៃ</h2>
+                <form id="daily-data-form">
+                    <label for="date">កាលបរិច្ឆេទ:</label>
+                    <input type="date" id="date" required>
+
+                    <label for="weight">ទម្ងន់ (គីឡូក្រាម):</label>
+                    <input type="number" id="weight" step="0.1" placeholder="ឧទាហរណ៍: 65.5" required>
+
+                    <label for="water">ទឹក (លីត្រ):</label>
+                    <input type="number" id="water" step="0.1" placeholder="ឧទាហរណ៍: 2.5" required>
+                    
+                    <label for="sleep">ម៉ោងគេង (ម៉ោង):</label>
+                    <input type="number" id="sleep" step="0.5" placeholder="ឧទាហរណ៍: 7.5" required>
+
+                    <button type="submit">រក្សាទុកកំណត់ត្រា</button>
+                    <p id="save-message" class="message"></p>
+                </form>
+            </div>
+            
+            <div class="card history-card">
+                <h2>កំណត់ត្រាចុងក្រោយ</h2>
+                <ul id="history-list">
+                    <li>មិនទាន់មានទិន្នន័យ...</li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="dashboard-view" class="tab-content">
+            <div class="summary-grid">
+                <div class="summary-box">
+                    <h3>BMI បច្ចុប្បន្ន</h3>
+                    <p id="current-bmi" class="kpi-value">-</p>
+                    <span id="bmi-status">-</span>
+                </div>
+                <div class="summary-box">
+                    <h3>ម៉ោងគេងមធ្យម (7 ថ្ងៃ)</h3>
+                    <p id="avg-sleep" class="kpi-value">-</p>
+                </div>
+                <div class="summary-box">
+                    <h3>ទឹកសរុប (7 ថ្ងៃ)</h3>
+                    <p id="total-water" class="kpi-value">-</p>
+                </div>
+            </div>
+            
+            <div class="chart-area">
+                <div class="chart-container">
+                    <h3>និន្នាការទម្ងន់ (30 ថ្ងៃ)</h3>
+                    <canvas id="weightChart"></canvas> 
+                </div>
+                <div class="chart-container">
+                    <h3>វឌ្ឍនភាពទឹក (គោលដៅ 3L/ថ្ងៃ)</h3>
+                    <canvas id="waterChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+<script src="src/script.js"></script>
+</body>
+</html>
